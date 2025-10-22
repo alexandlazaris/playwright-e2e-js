@@ -1,41 +1,29 @@
 import { test, expect } from '@playwright/test';
-import homePage from '../selectors/homePage';
-import landingPage from '../selectors/landingPage';
+import { LoginPage } from '../pageObjects/loginPage';
+import { InventoryPage } from '../pageObjects/inventoryPage';
 
-test('instagram - login', async ({ page }) => {
-    // proceed to login
-    await page.goto('https://instagram.com/');
-    await expect(page.locator(homePage.input_username)).toBeVisible();
-    await expect(page.locator(homePage.input_password)).toBeVisible();
-    await page.fill(homePage.input_username, process.env.USERNAME);
-    await page.fill(homePage.input_password, process.env.PASSWORD);
-    await page.getByRole('button', { name: 'Log in', exact: true}).click();
-    // wait for login transition to be complete
-    await page.waitForURL('https://www.instagram.com/accounts/onetap/?next=%2F');
-    await page.getByRole('button', { name: 'Not Now', exact: true}).click();
-    await expect(page.locator(landingPage.tab_profile)).toBeVisible();
-    // take screenshot
-    await page.waitForSelector(landingPage.tab_profile);
-    let mask_locator  = await page.locator(landingPage.tab_profile);
-    await page.screenshot({path: "screenshots/screenshot-maskedLoggedIn.png", mask:[mask_locator]});
+
+test('successfully login to see shopping cart', async ({ page }) => {
+    // arrange
+    const login = new LoginPage(page);
+    const inventory = new InventoryPage(page);
+    // act
+    await page.goto('/');
+    await login.login(process.env.USERNAME, process.env.PASSWORD);
+    await page.waitForURL('https://www.saucedemo.com/inventory.html');
+    // assert
+    await expect(inventory.cartContainer).toBeVisible()
 });
 
-test('instagram - login + logout', async ({ page }) => {
-    // proceed to login
-    await page.goto('https://instagram.com/');
-    await expect(page.locator(homePage.input_username)).toBeVisible();
-    await expect(page.locator(homePage.input_password)).toBeVisible();
-    await page.fill(homePage.input_username, process.env.USERNAME);
-    await page.fill(homePage.input_password, process.env.PASSWORD);
-    await page.getByRole('button', { name: 'Log in', exact: true}).click();
-    // wait for login transition to be complete
-    await page.waitForURL('https://www.instagram.com/accounts/onetap/?next=%2F');
-    await page.getByRole('button', { name: 'Not Now', exact: true}).click();
-    await expect(page.locator(landingPage.tab_profile)).toBeVisible();
-    // proceed to logout
-    await page.click(landingPage.settings_icon);
-    await page.getByText("Log out").click();
-    // confirm logout
-    await expect(page.locator(homePage.input_username)).toBeVisible();
-    await page.screenshot({path: "screenshots/screenshot-loggedOut.png"});
+test('successfully login and logout', async ({ page }) => {
+    // arrange
+    const login = new LoginPage(page);
+    const inventory = new InventoryPage(page);
+    // act
+    await page.goto('/');
+    await login.login(process.env.USERNAME, process.env.PASSWORD);
+    await page.waitForURL('https://www.saucedemo.com/inventory.html');
+    await inventory.openMenuAndLogout();
+    // assert
+    await expect(page.url()).toEqual(process.env.BASE_URL)
 });
