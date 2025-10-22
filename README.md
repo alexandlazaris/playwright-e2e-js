@@ -1,3 +1,5 @@
+[![Playwright Tests](https://github.com/alexandlazaris/playwright-e2e-js/actions/workflows/playwright.yml/badge.svg)](https://github.com/alexandlazaris/playwright-e2e-js/actions/workflows/playwright.yml)
+
 # playwright-demo
 Tests using playwright automation framework
 
